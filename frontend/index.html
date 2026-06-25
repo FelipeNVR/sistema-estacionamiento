@@ -7,13 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        parking: { 300: '#60a5fa', 400: '#3b82f6', 500: '#2563eb', 900: '#1e3a8a' }
-                    }
-                }
-            }
+            theme: { extend: { colors: { parking: { 300: '#60a5fa', 400: '#3b82f6', 500: '#2563eb', 900: '#1e3a8a' } } } }
         }
     </script>
     <style>
@@ -38,7 +32,7 @@
                     <p class="text-xs text-slate-400">Proyecto Integrador · Visión Artificial</p>
                 </div>
             </div>
-            <a href="#arquitectura" class="text-sm font-medium hover:text-white transition">Arquitectura</a>
+            <a href="#reportes" class="text-sm font-medium hover:text-white transition">Historial</a>
         </div>
     </header>
 
@@ -50,39 +44,37 @@
                 Gestión espacial con <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-parking-400 to-sky-300">Atención Neuronal Global</span>
             </h1>
             <p class="mt-6 mx-auto max-w-2xl text-lg text-slate-400">
-                Sistema funcional de segmentación 16x16. La IA analiza el contexto completo del estacionamiento ignorando sombras e ilusiones ópticas gracias al mecanismo de Self-Attention del ViT-B/16.
+                Sistema funcional de segmentación 16x16 conectado a Base de Datos (SQLite) para persistencia de reportes en tiempo real.
             </p>
         </section>
 
         <section id="demo" class="mb-20 grid gap-6 lg:grid-cols-3">
-            
             <div class="glass rounded-2xl p-6 lg:col-span-1 flex flex-col gap-6">
                 <div>
                     <h3 class="text-lg font-bold text-white mb-2">Panel de Control</h3>
-                    <label class="text-xs font-medium text-slate-400">API Backend URL (Docker / Ngrok)</label>
-                    <input type="text" id="apiUrl" value="http://localhost:8000/predict_grid" class="mt-1 w-full rounded-lg bg-slate-900 border border-slate-700 p-2.5 text-sm text-white focus:border-parking-500 focus:ring-1 focus:ring-parking-500 outline-none transition">
+                    <label class="text-xs font-medium text-slate-400">API Backend URL</label>
+                    <input type="text" id="apiUrl" value="http://localhost:8000" class="mt-1 w-full rounded-lg bg-slate-900 border border-slate-700 p-2.5 text-sm text-white focus:border-parking-500 outline-none transition">
                 </div>
 
                 <div class="p-4 rounded-xl border border-dashed border-slate-600 bg-slate-800/50 text-center hover:bg-slate-800 transition cursor-pointer relative">
                     <input type="file" id="imageInput" accept="image/jpeg, image/png" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
                     <div class="text-3xl mb-2">📸</div>
                     <p class="text-sm font-medium text-white">Subir captura aérea</p>
-                    <p class="text-xs text-slate-400 mt-1">Soporta JPG, PNG</p>
                 </div>
 
-                <button onclick="analizarEstacionamiento()" class="w-full rounded-xl bg-parking-500 py-3.5 font-bold text-white shadow-lg shadow-parking-500/25 transition hover:bg-parking-400 hover:scale-[1.02] active:scale-95">
+                <button onclick="analizarEstacionamiento()" class="w-full rounded-xl bg-parking-500 py-3.5 font-bold text-white shadow-lg transition hover:bg-parking-400 hover:scale-[1.02] active:scale-95">
                     Analizar Cuadrícula (16x16)
                 </button>
 
-                <div id="status-msg" class="text-center text-sm font-medium text-amber-400 hidden">⏳ Procesando lotes en GPU/CPU...</div>
+                <div id="status-msg" class="text-center text-sm font-medium text-amber-400 hidden">⏳ Procesando lotes en IA...</div>
 
                 <div class="grid grid-cols-2 gap-4 mt-auto">
                     <div class="bg-slate-900 rounded-xl p-4 border border-slate-700/50 text-center">
-                        <p class="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">Disponibles</p>
+                        <p class="text-xs text-slate-400 font-medium uppercase mb-1">Disponibles</p>
                         <p id="stat-disp" class="text-3xl font-black text-emerald-400">0</p>
                     </div>
                     <div class="bg-slate-900 rounded-xl p-4 border border-slate-700/50 text-center">
-                        <p class="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">Ocupados</p>
+                        <p class="text-xs text-slate-400 font-medium uppercase mb-1">Ocupados</p>
                         <p id="stat-ocup" class="text-3xl font-black text-red-400">0</p>
                     </div>
                 </div>
@@ -93,7 +85,6 @@
                     <div class="text-5xl mb-4 opacity-50">🛰️</div>
                     <p class="text-slate-400 font-medium">Sube una imagen para iniciar el monitoreo</p>
                 </div>
-                
                 <div class="canvas-container shadow-2xl" id="canvas-container" style="display: none;">
                     <img id="preview" alt="Cámara Estacionamiento">
                     <div id="grid-overlay"></div>
@@ -101,62 +92,37 @@
             </div>
         </section>
 
-        <section id="arquitectura" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-10">
+        <section id="reportes" class="mb-20 glass rounded-2xl p-8">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Historial de Detecciones (Persistencia)</h2>
+                    <p class="text-sm text-slate-400">Registros almacenados en SQLite</p>
+                </div>
+                <button onclick="cargarReportes()" class="rounded-lg bg-slate-800 border border-slate-600 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 transition">
+                    🔄 Refrescar Datos
+                </button>
+            </div>
             
-            <div class="glass rounded-2xl p-6">
-                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><span>📊</span> Rendimiento ViT</h3>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <p class="text-xs text-slate-400">Accuracy</p>
-                        <p class="text-2xl font-bold text-parking-300">98.87%</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-slate-400">F1-Score</p>
-                        <p class="text-2xl font-bold text-amber-300">99.05%</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-slate-400">Precision</p>
-                        <p class="text-2xl font-bold text-sky-300">98.42%</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-slate-400">Recall</p>
-                        <p class="text-2xl font-bold text-violet-300">99.68%</p>
-                    </div>
-                </div>
-                <div class="mt-4 pt-4 border-t border-slate-700/50">
-                    <p class="text-xs text-slate-400"><span class="text-emerald-400">✓</span> Validación Cruzada de Dominios aplicada.</p>
-                </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-slate-300">
+                    <thead class="bg-slate-900/50 text-xs uppercase text-slate-400">
+                        <tr>
+                            <th class="px-6 py-3 rounded-tl-lg">Fecha y Hora</th>
+                            <th class="px-6 py-3">Archivo Analizado</th>
+                            <th class="px-6 py-3 text-center">Espacios Ocupados</th>
+                            <th class="px-6 py-3 text-center rounded-tr-lg">Espacios Disponibles</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-reportes" class="divide-y divide-slate-800/50">
+                        <tr>
+                            <td colspan="4" class="px-6 py-8 text-center text-slate-500">Haz clic en Refrescar Datos para conectar a la Base de Datos</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-
-            <div class="glass rounded-2xl p-6">
-                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><span>🗂️</span> Dataset PKLot</h3>
-                <ul class="space-y-3 text-sm text-slate-300">
-                    <li class="flex items-start gap-2"><span class="text-parking-400 mt-0.5">•</span> <div><span class="font-medium text-white">Train:</span> PUCPR, UFPR04</div></li>
-                    <li class="flex items-start gap-2"><span class="text-parking-400 mt-0.5">•</span> <div><span class="font-medium text-white">Validation:</span> UFPR05 (Blind Test)</div></li>
-                    <li class="flex items-start gap-2"><span class="text-parking-400 mt-0.5">•</span> <div><span class="font-medium text-white">Data Augmentation:</span> Rotación ±10°, Flip horizontal, Brillo dinámico.</div></li>
-                    <li class="flex items-start gap-2"><span class="text-parking-400 mt-0.5">•</span> <div><span class="font-medium text-white">Resolución:</span> Escalado nativo a 224x224 px para la capa de atención.</div></li>
-                </ul>
-            </div>
-
-            <div class="glass rounded-2xl p-6 lg:col-span-1 md:col-span-2">
-                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><span>⚙️</span> Microservicios</h3>
-                <div class="bg-slate-900/50 rounded-lg p-4 font-mono text-xs text-slate-400 mb-4">
-                    Cliente (Navegador) <br>
-                    &nbsp;└── Vercel (Frontend HTML/JS) <br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── [Fetch API CORS] <br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── Docker Container <br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── FastAPI (Python) <br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── Modelo ViT (SavedModel)
-                </div>
-                <p class="text-xs text-slate-300">La cuadrícula de 16x16 genera 256 tensores procesados simultáneamente en un único lote matemático.</p>
-            </div>
-
         </section>
-    </main>
 
-    <footer class="border-t border-white/5 py-8 text-center text-sm text-slate-500 mt-auto">
-        Sistema Funcional · Ingeniería Civil Informática
-    </footer>
+    </main>
 
     <script>
         const imageInput = document.getElementById('imageInput');
@@ -182,18 +148,18 @@
 
         async function analizarEstacionamiento() {
             const file = imageInput.files[0];
-            const apiUrl = document.getElementById('apiUrl').value;
+            const baseUrl = document.getElementById('apiUrl').value; // Toma la URL base (http://localhost:8000)
             if (!file) return alert("Por favor, sube una foto primero.");
 
             statusMsg.style.display = 'block';
             statusMsg.className = "text-center text-sm font-medium text-amber-400 animate-pulse";
-            statusMsg.innerText = "⏳ Extrayendo 256 zonas y procesando inferencia...";
+            statusMsg.innerText = "⏳ Evaluando y guardando en BD...";
             
             const formData = new FormData();
             formData.append("file", file);
 
             try {
-                const response = await fetch(apiUrl, { method: "POST", body: formData });
+                const response = await fetch(`${baseUrl}/predict_grid`, { method: "POST", body: formData });
                 if (!response.ok) throw new Error("Error de comunicación con Backend");
                 const data = await response.json();
                 
@@ -207,17 +173,51 @@
                 data.celdas.forEach(celda => {
                     const div = document.createElement('div');
                     div.className = `celda ${celda.estado.toLowerCase()}`;
-                    // Tooltip nativo al pasar el mouse
                     div.title = `Bloque [${celda.fila + 1}, ${celda.columna + 1}]\nEstado: ${celda.estado}\nConfianza ViT: ${(celda.confianza * 100).toFixed(1)}%`;
                     gridOverlay.appendChild(div);
                 });
 
                 statusMsg.className = "text-center text-sm font-medium text-emerald-400";
-                statusMsg.innerText = "✅ Análisis de alta densidad completado";
+                statusMsg.innerText = "✅ Análisis guardado en BD.";
+                
+                // Actualiza la tabla automáticamente después de analizar
+                cargarReportes();
+
             } catch (error) {
                 statusMsg.className = "text-center text-sm font-medium text-red-400";
-                statusMsg.innerText = "❌ Error: Verifica que Docker/Ngrok estén corriendo y la URL sea correcta.";
-                console.error(error);
+                statusMsg.innerText = "❌ Error: Verifica Docker/Ngrok.";
+            }
+        }
+
+        // --- FUNCIÓN PARA CONSULTAR LA BASE DE DATOS ---
+        async function cargarReportes() {
+            const baseUrl = document.getElementById('apiUrl').value;
+            const tabla = document.getElementById('tabla-reportes');
+            
+            try {
+                const response = await fetch(`${baseUrl}/reportes`);
+                if (!response.ok) throw new Error("Error fetching DB");
+                const reportes = await response.json();
+                
+                if (reportes.length === 0) {
+                    tabla.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-slate-500">No hay registros aún en la Base de Datos.</td></tr>`;
+                    return;
+                }
+
+                tabla.innerHTML = '';
+                reportes.forEach(r => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-800/30 transition";
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap"><span class="bg-slate-800 text-slate-300 px-2 py-1 rounded text-xs">${r.fecha}</span></td>
+                        <td class="px-6 py-4 truncate max-w-[200px] text-parking-300 font-mono text-xs">${r.archivo}</td>
+                        <td class="px-6 py-4 text-center font-bold text-red-400">${r.ocupados}</td>
+                        <td class="px-6 py-4 text-center font-bold text-emerald-400">${r.disponibles}</td>
+                    `;
+                    tabla.appendChild(tr);
+                });
+            } catch (error) {
+                tabla.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-red-400">❌ No se pudo conectar a la Base de Datos.</td></tr>`;
             }
         }
     </script>
