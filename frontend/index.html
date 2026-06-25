@@ -6,10 +6,12 @@
     <title>Monitoreo Inteligente de Estacionamiento</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; flex-direction: column; align-items: center; padding: 50px; }
-        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 100%; }
-        h2 { color: #333; }
-        input[type="file"] { margin: 20px 0; }
-        button { background: #0070f3; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: center; max-width: 450px; width: 100%; }
+        h2 { color: #333; margin-bottom: 5px; }
+        .config-box { background: #eee; padding: 10px; border-radius: 5px; margin-bottom: 20px; font-size: 12px; text-align: left; }
+        input[type="text"] { width: 95%; padding: 5px; margin-top: 5px; }
+        input[type="file"] { margin: 15px 0; }
+        button { background: #0070f3; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%; }
         button:hover { background: #005bb5; }
         #resultado { margin-top: 20px; font-weight: bold; font-size: 18px; }
         .ocupado { color: #d32f2f; }
@@ -18,17 +20,19 @@
     </style>
 </head>
 <body>
-
     <div class="container">
         <h2>Monitor ViT-B/16</h2>
+
+        <div class="config-box">
+            <label>🔌 Conexión a la API (Backend):</label>
+            <input type="text" id="apiUrl" value="http://localhost:8000/predict">
+        </div>
+
         <p>Sube la foto del cajón de estacionamiento</p>
-        
         <input type="file" id="imageInput" accept="image/jpeg, image/png">
-        <br>
         <img id="preview" alt="Vista previa">
         <br><br>
         <button onclick="analizarImagen()">Analizar Ocupación</button>
-
         <div id="resultado"></div>
     </div>
 
@@ -36,48 +40,36 @@
         const imageInput = document.getElementById('imageInput');
         const preview = document.getElementById('preview');
 
-        // Mostrar vista previa de la foto
         imageInput.addEventListener('change', function() {
             const file = this.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                }
+                reader.onload = e => { preview.src = e.target.result; preview.style.display = 'block'; }
                 reader.readAsDataURL(file);
             }
         });
 
         async function analizarImagen() {
             const file = imageInput.files[0];
-            if (!file) {
-                alert("Por favor, selecciona una imagen primero.");
-                return;
-            }
+            const apiUrl = document.getElementById('apiUrl').value;
+            if (!file) return alert("Selecciona una imagen primero.");
 
             const resultadoDiv = document.getElementById('resultado');
-            resultadoDiv.innerHTML = "⏳ Analizando con IA...";
+            resultadoDiv.innerHTML = "⏳ Procesando en Docker...";
             resultadoDiv.className = "";
 
             const formData = new FormData();
             formData.append("file", file);
 
             try {
-                // AQUÍ VA LA URL DE TU BACKEND EN PRODUCCIÓN O LOCALHOST
-                const response = await fetch("http://localhost:8000/predict", {
-                    method: "POST",
-                    body: formData
-                });
-                
+                const response = await fetch(apiUrl, { method: "POST", body: formData });
+                if (!response.ok) throw new Error("Error de red");
                 const data = await response.json();
-                
+
                 resultadoDiv.innerHTML = `Estado: ${data.estado} <br> <span style="font-size: 14px; color: #666;">Confianza: ${data.confianza}%</span>`;
                 resultadoDiv.className = data.estado === "Ocupado" ? "ocupado" : "disponible";
-
             } catch (error) {
-                resultadoDiv.innerHTML = "❌ Error al conectar con el servidor.";
-                console.error(error);
+                resultadoDiv.innerHTML = "❌ Servidor no disponible.";
             }
         }
     </script>

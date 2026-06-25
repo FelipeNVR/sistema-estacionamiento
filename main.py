@@ -20,7 +20,7 @@ app.add_middleware(
 
 print("Cargando el Vision Transformer (ViT-B/16)... Esto tomará unos segundos.")
 # Cargamos la carpeta del modelo SavedModel
-model = tfk.models.load_model('../modelo_vit_oficial')
+model = tfk.models.load_model('modelo_vit_oficial')
 print("¡Modelo cargado en memoria!")
 
 def preprocesar_imagen(image_bytes):
