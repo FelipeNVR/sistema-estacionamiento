@@ -3,22 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard PKLot - Análisis Espacial</title>
+    <title>Dashboard PKLot - Monitoreo de Alta Densidad</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: white; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .main-wrapper { display: flex; gap: 20px; max-width: 1200px; width: 100%; flex-wrap: wrap; }
+        .main-wrapper { display: flex; gap: 20px; max-width: 1300px; width: 100%; flex-wrap: wrap; }
         
-        /* Panel Izquierdo (Imagen y Cuadrícula) */
-        .image-panel { background: #1e293b; padding: 20px; border-radius: 12px; flex: 2; min-width: 300px; display: flex; flex-direction: column; align-items: center; }
-        .canvas-container { position: relative; display: inline-block; margin-top: 15px; width: 100%; max-width: 700px; }
+        /* Panel de visualización */
+        .image-panel { background: #1e293b; padding: 20px; border-radius: 12px; flex: 2.5; min-width: 350px; display: flex; flex-direction: column; align-items: center; }
+        .canvas-container { position: relative; display: inline-block; margin-top: 15px; width: 100%; max-width: 800px; }
         img#preview { width: 100%; height: auto; display: block; border-radius: 8px; }
         #grid-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: grid; border-radius: 8px; overflow: hidden; }
-        .celda { border: 1px solid rgba(255,255,255,0.2); transition: background 0.3s; }
-        .celda.ocupado { background-color: rgba(239, 68, 68, 0.4); border-color: rgba(239, 68, 68, 0.8); }
-        .celda.disponible { background-color: rgba(34, 197, 94, 0.4); border-color: rgba(34, 197, 94, 0.8); }
         
-        /* Panel Derecho (Controles y Estadísticas) */
-        .control-panel { background: #1e293b; padding: 30px; border-radius: 12px; flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 20px; }
+        /* Ajuste de líneas para alta densidad */
+        .celda { border: 0.5px solid rgba(255,255,255,0.08); transition: background 0.2s; }
+        .celda.ocupado { background-color: rgba(239, 68, 68, 0.35); border-color: rgba(239, 68, 68, 0.5); }
+        .celda.disponible { background-color: rgba(34, 197, 94, 0.35); border-color: rgba(34, 197, 94, 0.5); }
+        
+        /* Panel de control */
+        .control-panel { background: #1e293b; padding: 30px; border-radius: 12px; flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 20px; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .stat-box { background: #334155; padding: 15px; border-radius: 8px; text-align: center; }
         .stat-box h3 { margin: 0; font-size: 24px; }
@@ -37,7 +39,7 @@
 
     <div class="main-wrapper">
         <div class="image-panel">
-            <h2>Vista de Cámara aerea</h2>
+            <h2>Cámara Aérea (Alta Resolución)</h2>
             <div class="canvas-container" id="canvas-container" style="display: none;">
                 <img id="preview" alt="Estacionamiento">
                 <div id="grid-overlay"></div>
@@ -46,16 +48,16 @@
 
         <div class="control-panel">
             <div>
-                <label style="font-size: 12px; color: #94a3b8;">API URL:</label>
+                <label style="font-size: 12px; color: #94a3b8;">API URL EndPoint:</label>
                 <input type="text" id="apiUrl" value="http://localhost:8000/predict_grid">
             </div>
 
             <div>
                 <input type="file" id="imageInput" accept="image/jpeg, image/png">
-                <button onclick="analizarEstacionamiento()">Analizar Zonas</button>
+                <button onclick="analizarEstacionamiento()">Analizar Micro-Zonas</button>
             </div>
             
-            <div id="status-msg">Esperando imagen...</div>
+            <div id="status-msg">Esperando captura...</div>
 
             <div class="stats-grid">
                 <div class="stat-box">
@@ -68,7 +70,7 @@
                 </div>
                 <div class="stat-box" style="grid-column: span 2;">
                     <h3 id="stat-total">0</h3>
-                    <p>Total de Espacios Analizados</p>
+                    <p>Micro-Espacios Detectados</p>
                 </div>
             </div>
         </div>
@@ -87,7 +89,7 @@
                 reader.onload = e => { 
                     preview.src = e.target.result; 
                     container.style.display = 'inline-block';
-                    gridOverlay.innerHTML = ''; // Limpiar grilla anterior
+                    gridOverlay.innerHTML = ''; 
                 }
                 reader.readAsDataURL(file);
             }
@@ -98,7 +100,7 @@
             const apiUrl = document.getElementById('apiUrl').value;
             if (!file) return alert("Selecciona una imagen primero.");
 
-            document.getElementById('status-msg').innerHTML = "⏳ Segmentando y analizando con ViT...";
+            document.getElementById('status-msg').innerHTML = "⏳ Extrayendo 256 zonas y procesando en ViT...";
             
             const formData = new FormData();
             formData.append("file", file);
@@ -108,12 +110,10 @@
                 if (!response.ok) throw new Error("Error de red");
                 const data = await response.json();
                 
-                // Actualizar Estadísticas
                 document.getElementById('stat-disp').innerText = data.stats.disponibles;
                 document.getElementById('stat-ocup').innerText = data.stats.ocupados;
                 document.getElementById('stat-total').innerText = data.stats.total;
                 
-                // Dibujar la Cuadrícula
                 gridOverlay.style.gridTemplateColumns = `repeat(${data.grid_size.columnas}, 1fr)`;
                 gridOverlay.style.gridTemplateRows = `repeat(${data.grid_size.filas}, 1fr)`;
                 gridOverlay.innerHTML = '';
@@ -121,11 +121,11 @@
                 data.celdas.forEach(celda => {
                     const div = document.createElement('div');
                     div.className = `celda ${celda.estado.toLowerCase()}`;
-                    div.title = `Fila: ${celda.fila}, Col: ${celda.columna} | ${celda.estado} (${(celda.confianza * 100).toFixed(0)}%)`;
+                    div.title = `Fila: ${celda.fila + 1}, Col: ${celda.columna + 1} | ${celda.estado} (${(celda.confianza * 100).toFixed(0)}%)`;
                     gridOverlay.appendChild(div);
                 });
 
-                document.getElementById('status-msg').innerHTML = "✅ Análisis completado.";
+                document.getElementById('status-msg').innerHTML = "✅ Análisis de alta resolución completado.";
             } catch (error) {
                 document.getElementById('status-msg').innerHTML = "❌ Servidor no disponible.";
             }

@@ -6,7 +6,7 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 import tf_keras as tfk
 
-app = FastAPI(title="API PKLot - Vision Transformer Grid")
+app = FastAPI(title="API PKLot - Vision Transformer High-Density Grid")
 
 app.add_middleware(
     CORSMiddleware,
@@ -25,16 +25,16 @@ async def predecir_estacionamiento_grid(file: UploadFile = File(...)):
     contents = await file.read()
     image = Image.open(io.BytesIO(contents)).convert("RGB")
     
-    # Configuración de la cuadrícula (8 filas x 8 columnas = 64 celdas)
-    filas = 8
-    columnas = 8
+    # Alta densidad: 16 filas x 16 columnas = 256 micro-zonas
+    filas = 16
+    columnas = 16
     ancho_celda = image.width // columnas
     alto_celda = image.height // filas
     
     parches = []
     coordenadas = []
     
-    # 1. Recortar la imagen en celdas
+    # 1. Recorte de alta resolución
     for f in range(filas):
         for c in range(columnas):
             left = c * ancho_celda
@@ -48,11 +48,10 @@ async def predecir_estacionamiento_grid(file: UploadFile = File(...)):
             parches.append(np.array(parche) / 255.0)
             coordenadas.append({"fila": f, "columna": c})
             
-    # 2. Procesamiento en lote (Vectorizado para que sea rápido en Docker)
+    # 2. Inferencia masiva vectorizada (256 tensores procesados en un solo bloque)
     batch_tensor = np.array(parches)
-    predicciones = model.predict(batch_tensor)
+    predicciones = model.predict(batch_tensor, batch_size=64)
     
-    # 3. Armar la respuesta con el estado de cada celda
     resultados = []
     ocupados = 0
     disponibles = 0
