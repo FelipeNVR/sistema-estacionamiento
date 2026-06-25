@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+.env
+# Ignoramos la carpeta del modelo pesado para no romper GitHub
+modelo_vit_oficial/
