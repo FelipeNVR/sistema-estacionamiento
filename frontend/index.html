@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estacionamiento Inteligente | ViT-B/16</title>
+    <title>Sistema de Monitoreo Inteligente de Estacionamientos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -15,10 +15,10 @@
         .canvas-container { position: relative; display: inline-block; width: 100%; max-width: 800px; border-radius: 8px; overflow: hidden; }
         img#preview { width: 100%; height: auto; display: block; }
         #grid-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: grid; }
-        .celda { border: 0.5px solid rgba(255,255,255,0.1); transition: all 0.3s ease; }
-        .celda:hover { border: 1px solid white; z-index: 10; }
-        .celda.ocupado { background-color: rgba(239, 68, 68, 0.3); border-color: rgba(239, 68, 68, 0.5); }
-        .celda.disponible { background-color: rgba(34, 197, 94, 0.3); border-color: rgba(34, 197, 94, 0.5); }
+        .celda { border: 0.5px solid rgba(255,255,255,0.08); transition: all 0.2s ease; cursor: pointer; }
+        .celda:hover { border: 1.5px solid #ffffff; box-shadow: inset 0 0 8px rgba(255,255,255,0.5); z-index: 10; }
+        .celda.ocupado { background-color: rgba(239, 68, 68, 0.35); border-color: rgba(239, 68, 68, 0.5); }
+        .celda.disponible { background-color: rgba(34, 197, 94, 0.35); border-color: rgba(34, 197, 94, 0.5); }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-200 font-sans antialiased selection:bg-parking-500 selection:text-white">
@@ -28,62 +28,80 @@
             <div class="flex items-center gap-3">
                 <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-parking-500 font-bold text-white shadow-lg shadow-parking-500/30">P</div>
                 <div>
-                    <p class="font-bold text-white tracking-tight">Monitor Inteligente</p>
-                    <p class="text-xs text-slate-400">Proyecto Integrador · Visión Artificial</p>
+                    <p class="font-bold text-white tracking-tight">Estacionamiento Inteligente</p>
+                    <p class="text-xs text-slate-400">Solución de Visión Artificial Integrada</p>
                 </div>
             </div>
-            <a href="#reportes" class="text-sm font-medium hover:text-white transition">Historial</a>
+            <div class="flex gap-6 text-sm font-medium">
+                <a href="#demo" class="hover:text-white transition">Demo</a>
+                <a href="#arquitectura" class="hover:text-white transition">Arquitectura</a>
+                <a href="#reportes" class="hover:text-white transition">Historial BD</a>
+            </div>
         </div>
     </header>
 
     <main class="mx-auto max-w-7xl px-6 py-12">
         
-        <section class="mb-16 text-center">
-            <span class="rounded-full bg-parking-500/20 border border-parking-500/30 px-4 py-1.5 text-xs font-semibold text-parking-300">Hito 7 · Vision Transformer (ViT)</span>
+        <section class="mb-12 text-center">
+            <span class="rounded-full bg-parking-500/20 border border-parking-500/30 px-4 py-1.5 text-xs font-semibold text-parking-300">Proyecto Final Integrado</span>
             <h1 class="mt-6 text-4xl font-extrabold tracking-tight text-white md:text-6xl">
-                Gestión espacial con <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-parking-400 to-sky-300">Atención Neuronal Global</span>
+                Análisis de Ocupación por <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-parking-400 to-sky-300">Segmentación de Alta Densidad</span>
             </h1>
-            <p class="mt-6 mx-auto max-w-2xl text-lg text-slate-400">
-                Sistema funcional de segmentación 16x16 conectado a Base de Datos (SQLite) para persistencia de reportes en tiempo real.
-            </p>
         </section>
 
-        <section id="demo" class="mb-20 grid gap-6 lg:grid-cols-3">
-            <div class="glass rounded-2xl p-6 lg:col-span-1 flex flex-col gap-6">
+        <section id="demo" class="mb-16 grid gap-6 lg:grid-cols-3">
+            
+            <div class="glass rounded-2xl p-6 lg:col-span-1 flex flex-col gap-5">
                 <div>
-                    <h3 class="text-lg font-bold text-white mb-2">Panel de Control</h3>
-                    <label class="text-xs font-medium text-slate-400">API Backend URL</label>
-                    <input type="text" id="apiUrl" value="http://localhost:8000" class="mt-1 w-full rounded-lg bg-slate-900 border border-slate-700 p-2.5 text-sm text-white focus:border-parking-500 outline-none transition">
+                    <h3 class="text-base font-bold text-white mb-3">⚙️ Configuración del Sistema</h3>
+                    <label class="text-xs font-medium text-slate-400">Endpoint del Servidor API</label>
+                    <input type="text" id="apiUrl" value="http://localhost:8000" class="mt-1 w-full rounded-lg bg-slate-900 border border-slate-700 p-2 text-sm text-white focus:border-parking-500 outline-none transition">
                 </div>
 
-                <div class="p-4 rounded-xl border border-dashed border-slate-600 bg-slate-800/50 text-center hover:bg-slate-800 transition cursor-pointer relative">
+                <div>
+                    <label class="text-xs font-medium text-slate-400">🧠 Seleccionar Algoritmo Predictivo</label>
+                    <select id="modelSelect" class="mt-1 w-full rounded-lg bg-slate-900 border border-slate-700 p-2.5 text-sm text-white focus:border-parking-500 outline-none transition font-medium">
+                        <option value="vit">Vision Transformer (ViT-B/16) - Atención Global</option>
+                        <option value="cnn">Red Neuronal Convolucional (CNN Base) - Local</option>
+                    </select>
+                </div>
+
+                <div class="p-4 rounded-xl border border-dashed border-slate-600 bg-slate-800/30 text-center hover:bg-slate-800/50 transition cursor-pointer relative">
                     <input type="file" id="imageInput" accept="image/jpeg, image/png" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                    <div class="text-3xl mb-2">📸</div>
-                    <p class="text-sm font-medium text-white">Subir captura aérea</p>
+                    <div class="text-2xl mb-1">📸</div>
+                    <p class="text-xs font-medium text-white">Subir captura de cámara de seguridad</p>
                 </div>
 
-                <button onclick="analizarEstacionamiento()" class="w-full rounded-xl bg-parking-500 py-3.5 font-bold text-white shadow-lg transition hover:bg-parking-400 hover:scale-[1.02] active:scale-95">
-                    Analizar Cuadrícula (16x16)
+                <button onclick="analizarEstacionamiento()" class="w-full rounded-xl bg-parking-500 py-3 font-bold text-white shadow-lg transition hover:bg-parking-400">
+                    Ejecutar Inferencia Espacial (16x16)
                 </button>
 
-                <div id="status-msg" class="text-center text-sm font-medium text-amber-400 hidden">⏳ Procesando lotes en IA...</div>
+                <div id="status-msg" class="text-center text-sm font-medium text-amber-400 hidden">⏳ Procesando...</div>
 
-                <div class="grid grid-cols-2 gap-4 mt-auto">
-                    <div class="bg-slate-900 rounded-xl p-4 border border-slate-700/50 text-center">
-                        <p class="text-xs text-slate-400 font-medium uppercase mb-1">Disponibles</p>
-                        <p id="stat-disp" class="text-3xl font-black text-emerald-400">0</p>
+                <div class="bg-slate-900/80 rounded-xl p-4 border border-slate-800 flex flex-col gap-1.5">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">🔍 Transparencia / Detalle de Celda</p>
+                    <div class="text-sm"><span class="text-slate-400">Ubicación:</span> <span id="cell-coord" class="font-mono font-bold">-</span></div>
+                    <div class="text-sm"><span class="text-slate-400">Estado Inferido:</span> <span id="cell-status" class="font-bold">-</span></div>
+                    <div class="text-sm"><span class="text-slate-400">Confianza de la Red:</span> <span id="cell-conf" class="font-mono font-bold text-parking-300">-</span></div>
+                    <p class="text-[10px] text-slate-500 mt-1">Haz clic sobre cualquier recuadro del mapa para auditar la métrica de confianza.</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-900 rounded-xl p-3 border border-slate-800 text-center">
+                        <p class="text-[11px] text-slate-400 uppercase tracking-wider mb-0.5">Disponibles</p>
+                        <p id="stat-disp" class="text-2xl font-black text-emerald-400">0</p>
                     </div>
-                    <div class="bg-slate-900 rounded-xl p-4 border border-slate-700/50 text-center">
-                        <p class="text-xs text-slate-400 font-medium uppercase mb-1">Ocupados</p>
-                        <p id="stat-ocup" class="text-3xl font-black text-red-400">0</p>
+                    <div class="bg-slate-900 rounded-xl p-3 border border-slate-800 text-center">
+                        <p class="text-[11px] text-slate-400 uppercase tracking-wider mb-0.5">Ocupados</p>
+                        <p id="stat-ocup" class="text-2xl font-black text-red-400">0</p>
                     </div>
                 </div>
             </div>
 
-            <div class="glass rounded-2xl p-6 lg:col-span-2 flex flex-col items-center justify-center min-h-[400px]">
+            <div class="glass rounded-2xl p-6 lg:col-span-2 flex flex-col items-center justify-center min-h-[420px]">
                 <div id="placeholder" class="text-center">
-                    <div class="text-5xl mb-4 opacity-50">🛰️</div>
-                    <p class="text-slate-400 font-medium">Sube una imagen para iniciar el monitoreo</p>
+                    <div class="text-5xl mb-3 opacity-40">🛰️</div>
+                    <p class="text-slate-400 text-sm font-medium">Introduce una captura para proyectar la matriz de ocupación</p>
                 </div>
                 <div class="canvas-container shadow-2xl" id="canvas-container" style="display: none;">
                     <img id="preview" alt="Cámara Estacionamiento">
@@ -92,30 +110,74 @@
             </div>
         </section>
 
-        <section id="reportes" class="mb-20 glass rounded-2xl p-8">
-            <div class="flex justify-between items-center mb-6">
+        <section id="arquitectura" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-16">
+            
+            <div class="glass rounded-2xl p-6 flex flex-col justify-between">
                 <div>
-                    <h2 class="text-2xl font-bold text-white">Historial de Detecciones (Persistencia)</h2>
-                    <p class="text-sm text-slate-400">Registros almacenados en SQLite</p>
+                    <h3 class="text-base font-bold text-white mb-3 flex items-center gap-2"><span>📊</span> Evaluación Comparativa</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between border-b border-slate-800 pb-1">
+                            <span class="text-slate-400">Métrica</span><span class="text-sky-400 font-bold">CNN</span><span class="text-emerald-400 font-bold">ViT-B/16</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Accuracy:</span><span class="font-mono text-slate-400">92.19%</span><span class="font-mono text-white font-bold">98.87%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Precision:</span><span class="font-mono text-slate-400">88.64%</span><span class="font-mono text-white font-bold">98.42%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Recall:</span><span class="font-mono text-slate-400">99.37%</span><span class="font-mono text-white font-bold">99.68%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>F1-Score:</span><span class="font-mono text-slate-400">93.70%</span><span class="font-mono text-white font-bold">99.05%</span>
+                        </div>
+                    </div>
                 </div>
-                <button onclick="cargarReportes()" class="rounded-lg bg-slate-800 border border-slate-600 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 transition">
-                    🔄 Refrescar Datos
+                <div class="text-[11px] text-slate-400 mt-4 pt-3 border-t border-slate-800">
+                    Muestras de validación: <span class="text-white font-bold">331.570</span> (Cámara UFPR05). <br>
+                    Muestras de entrenamiento: <span class="text-white font-bold">1.060.132</span>.
+                </div>
+            </div>
+
+            <div class="glass rounded-2xl p-6 lg:col-span-2">
+                <h3 class="text-base font-bold text-white mb-3 flex items-center gap-2"><span>🏗️</span> Diagrama de Arquitectura de Microservicios</h3>
+                <pre class="bg-slate-900 rounded-lg p-3.5 font-mono text-xs text-slate-400 overflow-x-auto leading-relaxed">
+Usuario ──> Interfaz Frontend (Vercel / HTML5 & Tailwind)
+               │
+               ▼ [Fetch API Async Requests con CORS]
+            Contenedor Aislado (Docker Engine Localhost)
+               ├── Backend API Engine (FastAPI / Python)
+               ├── Persistencia de Datos (SQLite 3)
+               └── Servicio de IA (TensorFlow / Keras Layer Pipeline)
+                      └── Modelo Clasificador Ganador (ViT-B/16 SavedModel)</pre>
+            </div>
+        </section>
+
+        <section id="reportes" class="glass rounded-2xl p-6">
+            <div class="flex justify-between items-center mb-5">
+                <div>
+                    <h2 class="text-xl font-bold text-white">Historial de Inferencia (Persistencia Relacional)</h2>
+                    <p class="text-xs text-slate-400">Registros transaccionales almacenados en SQLite</p>
+                </div>
+                <button onclick="cargarReportes()" class="rounded-lg bg-slate-900 border border-slate-700 px-3 py-1.5 text-xs font-semibold hover:bg-slate-800 transition">
+                    🔄 Sincronizar Base de Datos
                 </button>
             </div>
             
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm text-slate-300">
-                    <thead class="bg-slate-900/50 text-xs uppercase text-slate-400">
+                <table class="w-full text-left text-xs text-slate-300">
+                    <thead class="bg-slate-900 text-slate-400 uppercase tracking-wider">
                         <tr>
-                            <th class="px-6 py-3 rounded-tl-lg">Fecha y Hora</th>
-                            <th class="px-6 py-3">Archivo Analizado</th>
-                            <th class="px-6 py-3 text-center">Espacios Ocupados</th>
-                            <th class="px-6 py-3 text-center rounded-tr-lg">Espacios Disponibles</th>
+                            <th class="px-5 py-2.5 rounded-tl-lg">Fecha y Hora</th>
+                            <th class="px-5 py-2.5">Archivo</th>
+                            <th class="px-5 py-2.5 text-center">Algoritmo</th>
+                            <th class="px-5 py-2.5 text-center">Ocupados</th>
+                            <th class="px-5 py-2.5 text-center rounded-tr-lg">Disponibles</th>
                         </tr>
                     </thead>
-                    <tbody id="tabla-reportes" class="divide-y divide-slate-800/50">
+                    <tbody id="tabla-reportes" class="divide-y divide-slate-800">
                         <tr>
-                            <td colspan="4" class="px-6 py-8 text-center text-slate-500">Haz clic en Refrescar Datos para conectar a la Base de Datos</td>
+                            <td colspan="5" class="px-5 py-6 text-center text-slate-500">Haz clic en Sincronizar Base de Datos para consultar el archivo de persistencia.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -123,6 +185,10 @@
         </section>
 
     </main>
+
+    <footer class="border-t border-white/5 py-6 text-center text-xs text-slate-500 mt-12">
+        Sistema de Control e Inferencia Espacial · Ingeniería Civil Informática
+    </footer>
 
     <script>
         const imageInput = document.getElementById('imageInput');
@@ -141,26 +207,35 @@
                     placeholder.style.display = 'none';
                     container.style.display = 'inline-block';
                     gridOverlay.innerHTML = ''; 
+                    resetDetailPanel();
                 }
                 reader.readAsDataURL(file);
             }
         });
 
+        function resetDetailPanel() {
+            document.getElementById('cell-coord').innerText = "-";
+            document.getElementById('cell-status').innerText = "-";
+            document.getElementById('cell-status').className = "font-bold";
+            document.getElementById('cell-conf').innerText = "-";
+        }
+
         async function analizarEstacionamiento() {
             const file = imageInput.files[0];
-            const baseUrl = document.getElementById('apiUrl').value; // Toma la URL base (http://localhost:8000)
-            if (!file) return alert("Por favor, sube una foto primero.");
+            const baseUrl = document.getElementById('apiUrl').value;
+            const modelType = document.getElementById('modelSelect').value;
+            if (!file) return alert("Por favor, introduce una captura primero.");
 
             statusMsg.style.display = 'block';
             statusMsg.className = "text-center text-sm font-medium text-amber-400 animate-pulse";
-            statusMsg.innerText = "⏳ Evaluando y guardando en BD...";
+            statusMsg.innerText = "⏳ Extrayendo parches y calculando inferencia de red...";
             
             const formData = new FormData();
             formData.append("file", file);
 
             try {
-                const response = await fetch(`${baseUrl}/predict_grid`, { method: "POST", body: formData });
-                if (!response.ok) throw new Error("Error de comunicación con Backend");
+                const response = await fetch(`${baseUrl}/predict_grid?modelo_tipo=${modelType}`, { method: "POST", body: formData });
+                if (!response.ok) throw new Error("Error en servidor");
                 const data = await response.json();
                 
                 document.getElementById('stat-disp').innerText = data.stats.disponibles;
@@ -173,51 +248,58 @@
                 data.celdas.forEach(celda => {
                     const div = document.createElement('div');
                     div.className = `celda ${celda.estado.toLowerCase()}`;
-                    div.title = `Bloque [${celda.fila + 1}, ${celda.columna + 1}]\nEstado: ${celda.estado}\nConfianza ViT: ${(celda.confianza * 100).toFixed(1)}%`;
+                    
+                    // Al hacer clic, cargamos el panel de Transparencia de forma explícita
+                    div.addEventListener('click', () => {
+                        document.getElementById('cell-coord').innerText = `Fila ${celda.fila}, Columna ${celda.columna}`;
+                        const statusElem = document.getElementById('cell-status');
+                        statusElem.innerText = celda.estado;
+                        statusElem.className = celda.estado === "Ocupado" ? "font-bold text-red-400" : "font-bold text-emerald-400";
+                        document.getElementById('cell-conf').innerText = `${celda.confianza}%`;
+                    });
+                    
                     gridOverlay.appendChild(div);
                 });
 
                 statusMsg.className = "text-center text-sm font-medium text-emerald-400";
-                statusMsg.innerText = "✅ Análisis guardado en BD.";
-                
-                // Actualiza la tabla automáticamente después de analizar
+                statusMsg.innerText = `✅ Inferencia completada con éxito.`;
                 cargarReportes();
 
             } catch (error) {
                 statusMsg.className = "text-center text-sm font-medium text-red-400";
-                statusMsg.innerText = "❌ Error: Verifica Docker/Ngrok.";
+                statusMsg.innerText = "❌ Error en el Backend. Verifica la ejecución de Docker.";
             }
         }
 
-        // --- FUNCIÓN PARA CONSULTAR LA BASE DE DATOS ---
         async function cargarReportes() {
             const baseUrl = document.getElementById('apiUrl').value;
             const tabla = document.getElementById('tabla-reportes');
             
             try {
                 const response = await fetch(`${baseUrl}/reportes`);
-                if (!response.ok) throw new Error("Error fetching DB");
+                if (!response.ok) throw new Error("DB Error");
                 const reportes = await response.json();
                 
                 if (reportes.length === 0) {
-                    tabla.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-slate-500">No hay registros aún en la Base de Datos.</td></tr>`;
+                    tabla.innerHTML = `<tr><td colspan="5" class="px-5 py-4 text-center text-slate-500">No existen registros previos.</td></tr>`;
                     return;
                 }
 
                 tabla.innerHTML = '';
                 reportes.forEach(r => {
                     const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-800/30 transition";
+                    tr.className = "hover:bg-slate-900 transition";
                     tr.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap"><span class="bg-slate-800 text-slate-300 px-2 py-1 rounded text-xs">${r.fecha}</span></td>
-                        <td class="px-6 py-4 truncate max-w-[200px] text-parking-300 font-mono text-xs">${r.archivo}</td>
-                        <td class="px-6 py-4 text-center font-bold text-red-400">${r.ocupados}</td>
-                        <td class="px-6 py-4 text-center font-bold text-emerald-400">${r.disponibles}</td>
+                        <td class="px-5 py-3 whitespace-nowrap text-slate-400">${r.fecha}</td>
+                        <td class="px-5 py-3 truncate max-w-[180px] font-mono text-slate-300">${r.archivo}</td>
+                        <td class="px-5 py-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-parking-300 border border-parking-500/20">${r.modelo}</span></td>
+                        <td class="px-5 py-3 text-center font-bold text-red-400">${r.ocupados}</td>
+                        <td class="px-5 py-3 text-center font-bold text-emerald-400">${r.disponibles}</td>
                     `;
                     tabla.appendChild(tr);
                 });
             } catch (error) {
-                tabla.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-red-400">❌ No se pudo conectar a la Base de Datos.</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="5" class="px-5 py-4 text-center text-red-400">No se pudo recuperar la persistencia transaccional.</td></tr>`;
             }
         }
     </script>
