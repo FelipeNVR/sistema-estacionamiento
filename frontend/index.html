@@ -3,61 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoreo Inteligente de Estacionamiento</title>
+    <title>Dashboard PKLot - Análisis Espacial</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; flex-direction: column; align-items: center; padding: 50px; }
-        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: center; max-width: 450px; width: 100%; }
-        h2 { color: #333; margin-bottom: 5px; }
-        .config-box { background: #eee; padding: 10px; border-radius: 5px; margin-bottom: 20px; font-size: 12px; text-align: left; }
-        input[type="text"] { width: 95%; padding: 5px; margin-top: 5px; }
-        input[type="file"] { margin: 15px 0; }
-        button { background: #0070f3; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%; }
-        button:hover { background: #005bb5; }
-        #resultado { margin-top: 20px; font-weight: bold; font-size: 18px; }
-        .ocupado { color: #d32f2f; }
-        .disponible { color: #388e3c; }
-        img#preview { max-width: 100%; margin-top: 15px; border-radius: 8px; display: none; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: white; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .main-wrapper { display: flex; gap: 20px; max-width: 1200px; width: 100%; flex-wrap: wrap; }
+        
+        /* Panel Izquierdo (Imagen y Cuadrícula) */
+        .image-panel { background: #1e293b; padding: 20px; border-radius: 12px; flex: 2; min-width: 300px; display: flex; flex-direction: column; align-items: center; }
+        .canvas-container { position: relative; display: inline-block; margin-top: 15px; width: 100%; max-width: 700px; }
+        img#preview { width: 100%; height: auto; display: block; border-radius: 8px; }
+        #grid-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: grid; border-radius: 8px; overflow: hidden; }
+        .celda { border: 1px solid rgba(255,255,255,0.2); transition: background 0.3s; }
+        .celda.ocupado { background-color: rgba(239, 68, 68, 0.4); border-color: rgba(239, 68, 68, 0.8); }
+        .celda.disponible { background-color: rgba(34, 197, 94, 0.4); border-color: rgba(34, 197, 94, 0.8); }
+        
+        /* Panel Derecho (Controles y Estadísticas) */
+        .control-panel { background: #1e293b; padding: 30px; border-radius: 12px; flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 20px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .stat-box { background: #334155; padding: 15px; border-radius: 8px; text-align: center; }
+        .stat-box h3 { margin: 0; font-size: 24px; }
+        .stat-box p { margin: 5px 0 0; font-size: 12px; color: #94a3b8; }
+        .text-green { color: #4ade80; }
+        .text-red { color: #f87171; }
+        
+        input[type="file"] { margin-bottom: 10px; color: white; }
+        input[type="text"] { width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px; border: none; background: #334155; color: white; box-sizing: border-box; }
+        button { background: #3b82f6; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; }
+        button:hover { background: #2563eb; }
+        #status-msg { text-align: center; font-size: 14px; color: #cbd5e1; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Monitor ViT-B/16</h2>
 
-        <div class="config-box">
-            <label>🔌 Conexión a la API (Backend):</label>
-            <input type="text" id="apiUrl" value="http://localhost:8000/predict">
+    <div class="main-wrapper">
+        <div class="image-panel">
+            <h2>Vista de Cámara aerea</h2>
+            <div class="canvas-container" id="canvas-container" style="display: none;">
+                <img id="preview" alt="Estacionamiento">
+                <div id="grid-overlay"></div>
+            </div>
         </div>
 
-        <p>Sube la foto del cajón de estacionamiento</p>
-        <input type="file" id="imageInput" accept="image/jpeg, image/png">
-        <img id="preview" alt="Vista previa">
-        <br><br>
-        <button onclick="analizarImagen()">Analizar Ocupación</button>
-        <div id="resultado"></div>
+        <div class="control-panel">
+            <div>
+                <label style="font-size: 12px; color: #94a3b8;">API URL:</label>
+                <input type="text" id="apiUrl" value="http://localhost:8000/predict_grid">
+            </div>
+
+            <div>
+                <input type="file" id="imageInput" accept="image/jpeg, image/png">
+                <button onclick="analizarEstacionamiento()">Analizar Zonas</button>
+            </div>
+            
+            <div id="status-msg">Esperando imagen...</div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <h3 id="stat-disp" class="text-green">0</h3>
+                    <p>Disponibles</p>
+                </div>
+                <div class="stat-box">
+                    <h3 id="stat-ocup" class="text-red">0</h3>
+                    <p>Ocupados</p>
+                </div>
+                <div class="stat-box" style="grid-column: span 2;">
+                    <h3 id="stat-total">0</h3>
+                    <p>Total de Espacios Analizados</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
         const imageInput = document.getElementById('imageInput');
         const preview = document.getElementById('preview');
+        const container = document.getElementById('canvas-container');
+        const gridOverlay = document.getElementById('grid-overlay');
 
         imageInput.addEventListener('change', function() {
             const file = this.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = e => { preview.src = e.target.result; preview.style.display = 'block'; }
+                reader.onload = e => { 
+                    preview.src = e.target.result; 
+                    container.style.display = 'inline-block';
+                    gridOverlay.innerHTML = ''; // Limpiar grilla anterior
+                }
                 reader.readAsDataURL(file);
             }
         });
 
-        async function analizarImagen() {
+        async function analizarEstacionamiento() {
             const file = imageInput.files[0];
             const apiUrl = document.getElementById('apiUrl').value;
             if (!file) return alert("Selecciona una imagen primero.");
 
-            const resultadoDiv = document.getElementById('resultado');
-            resultadoDiv.innerHTML = "⏳ Procesando en Docker...";
-            resultadoDiv.className = "";
-
+            document.getElementById('status-msg').innerHTML = "⏳ Segmentando y analizando con ViT...";
+            
             const formData = new FormData();
             formData.append("file", file);
 
@@ -65,11 +107,27 @@
                 const response = await fetch(apiUrl, { method: "POST", body: formData });
                 if (!response.ok) throw new Error("Error de red");
                 const data = await response.json();
+                
+                // Actualizar Estadísticas
+                document.getElementById('stat-disp').innerText = data.stats.disponibles;
+                document.getElementById('stat-ocup').innerText = data.stats.ocupados;
+                document.getElementById('stat-total').innerText = data.stats.total;
+                
+                // Dibujar la Cuadrícula
+                gridOverlay.style.gridTemplateColumns = `repeat(${data.grid_size.columnas}, 1fr)`;
+                gridOverlay.style.gridTemplateRows = `repeat(${data.grid_size.filas}, 1fr)`;
+                gridOverlay.innerHTML = '';
 
-                resultadoDiv.innerHTML = `Estado: ${data.estado} <br> <span style="font-size: 14px; color: #666;">Confianza: ${data.confianza}%</span>`;
-                resultadoDiv.className = data.estado === "Ocupado" ? "ocupado" : "disponible";
+                data.celdas.forEach(celda => {
+                    const div = document.createElement('div');
+                    div.className = `celda ${celda.estado.toLowerCase()}`;
+                    div.title = `Fila: ${celda.fila}, Col: ${celda.columna} | ${celda.estado} (${(celda.confianza * 100).toFixed(0)}%)`;
+                    gridOverlay.appendChild(div);
+                });
+
+                document.getElementById('status-msg').innerHTML = "✅ Análisis completado.";
             } catch (error) {
-                resultadoDiv.innerHTML = "❌ Servidor no disponible.";
+                document.getElementById('status-msg').innerHTML = "❌ Servidor no disponible.";
             }
         }
     </script>
